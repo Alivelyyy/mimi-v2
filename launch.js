@@ -1,7 +1,7 @@
-
 const path = require('path');
 const fs = require('fs');
 const yaml = require('js-yaml');
+const { execSync } = require('child_process');
 
 require("dotenv").config();
 require("module-alias/register");
@@ -17,12 +17,20 @@ process.on('warning', (warning) => {
 const logger = require("@plugins/logger.js");
 
 logger.interceptConsole();
-
 logger.setupShutdownHooks();
-
 logger.banner();
 
 logger.log("Starting Mimi Bot...", "start", "Launch");
+
+// Install dependencies with --legacy-peer-deps first
+logger.log("Installing dependencies with --legacy-peer-deps...", "info", "Launch");
+try {
+  execSync('npm install --legacy-peer-deps', { stdio: 'inherit' });
+  logger.log("Dependencies installed successfully", "success", "Launch");
+} catch (error) {
+  logger.log(`Failed to install dependencies: ${error.message}`, "error", "Launch");
+  process.exit(1);
+}
 
 const configPath = path.join(__dirname, 'config.yml');
 let config;
